@@ -5,10 +5,11 @@ import logging
 import platform
 import struct
 import time
+from collections import defaultdict
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import pvporcupine
 from wyoming.audio import AudioChunk, AudioChunkConverter, AudioStart, AudioStop
@@ -32,6 +33,12 @@ class Keyword:
     model_path: Path
 
 
+@dataclass
+class Detector:
+    porcupine: pvporcupine.Porcupine
+    sensitivity: float
+
+
 class State:
     """State of system"""
 
@@ -39,19 +46,41 @@ class State:
         self.pv_lib_paths = pv_lib_paths
         self.keywords = keywords
 
-    def get_porcupine(
-        self, keyword_name: str, sensitivity: float
-    ) -> pvporcupine.Porcupine:
+        # keyword name -> [detector]
+        self.detector_cache: Dict[str, List[Detector]] = defaultdict(list)
+        self.detector_lock = asyncio.Lock()
+
+    async def get_porcupine(self, keyword_name: str, sensitivity: float) -> Detector:
         keyword = self.keywords.get(keyword_name)
         if keyword is None:
             raise ValueError(f"No keyword {keyword_name}")
 
+        # Check cache first for matching detector
+        async with self.detector_lock:
+            detectors = self.detector_cache.get(keyword_name)
+            if detectors:
+                detector = next(
+                    (d for d in detectors if d.sensitivity == sensitivity), None
+                )
+                if detector is not None:
+                    # Remove from cache for use
+                    detectors.remove(detector)
+
+                    _LOGGER.debug(
+                        "Using detector for %s from cache (%s)",
+                        keyword_name,
+                        len(detectors),
+                    )
+                    return detector
+
         _LOGGER.debug("Loading %s for %s", keyword.name, keyword.language)
-        return pvporcupine.create(
+        porcupine = pvporcupine.create(
             model_path=str(self.pv_lib_paths[keyword.language]),
             keyword_paths=[str(keyword.model_path)],
             sensitivities=[sensitivity],
         )
+
+        return Detector(porcupine, sensitivity)
 
 
 async def main() -> None:
@@ -158,7 +187,7 @@ class Porcupine1EventHandler(AsyncEventHandler):
         self.audio_buffer = bytes()
         self.detected = False
 
-        self.porcupine: Optional[pvporcupine.Porcupine] = None
+        self.detector: Optional[Detector] = None
         self.keyword_name: str = ""
         self.chunk_format: str = ""
         self.bytes_per_chunk: int = 0
@@ -175,15 +204,15 @@ class Porcupine1EventHandler(AsyncEventHandler):
             detect = Detect.from_event(event)
             if detect.names:
                 # TODO: use all names
-                self._load_keyword(detect.names[0])
+                await self._load_keyword(detect.names[0])
         elif AudioStart.is_type(event.type):
             self.detected = False
         elif AudioChunk.is_type(event.type):
-            if self.porcupine is None:
+            if self.detector is None:
                 # Default keyword
-                self._load_keyword(DEFAULT_KEYWORD)
+                await self._load_keyword(DEFAULT_KEYWORD)
 
-            assert self.porcupine is not None
+            assert self.detector is not None
 
             chunk = AudioChunk.from_event(event)
             chunk = self.converter.convert(chunk)
@@ -193,7 +222,7 @@ class Porcupine1EventHandler(AsyncEventHandler):
                 unpacked_chunk = struct.unpack_from(
                     self.chunk_format, self.audio_buffer[: self.bytes_per_chunk]
                 )
-                keyword_index = self.porcupine.process(unpacked_chunk)
+                keyword_index = self.detector.porcupine.process(unpacked_chunk)
                 if keyword_index >= 0:
                     _LOGGER.debug(
                         "Detected %s from client %s", self.keyword_name, self.client_id
@@ -225,13 +254,24 @@ class Porcupine1EventHandler(AsyncEventHandler):
     async def disconnect(self) -> None:
         _LOGGER.debug("Client disconnected: %s", self.client_id)
 
-    def _load_keyword(self, keyword_name: str):
-        self.porcupine = self.state.get_porcupine(
+        if self.detector is not None:
+            # Return detector to cache
+            async with self.state.detector_lock:
+                self.state.detector_cache[self.keyword_name].append(self.detector)
+                self.detector = None
+                _LOGGER.debug(
+                    "Detector for %s returned to cache (%s)",
+                    self.keyword_name,
+                    len(self.state.detector_cache[self.keyword_name]),
+                )
+
+    async def _load_keyword(self, keyword_name: str):
+        self.detector = await self.state.get_porcupine(
             keyword_name, self.cli_args.sensitivity
         )
         self.keyword_name = keyword_name
-        self.chunk_format = "h" * self.porcupine.frame_length
-        self.bytes_per_chunk = self.porcupine.frame_length * 2
+        self.chunk_format = "h" * self.detector.porcupine.frame_length
+        self.bytes_per_chunk = self.detector.porcupine.frame_length * 2
 
 
 # -----------------------------------------------------------------------------

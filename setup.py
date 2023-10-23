@@ -20,7 +20,7 @@ data_files = list(data_dir.rglob("*.pv")) + list(data_dir.rglob("*.ppn"))
 
 setup(
     name="wyoming_porcupine1",
-    version="1.0.0",
+    version="1.0.1",
     description="Wyoming Server for Porcupine 1",
     url="http://github.com/rhasspy/wyoming-porcupine1",
     author="Michael Hansen",
