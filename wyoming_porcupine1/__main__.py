@@ -18,6 +18,8 @@ from wyoming.info import Attribution, Describe, Info, WakeModel, WakeProgram
 from wyoming.server import AsyncEventHandler, AsyncServer
 from wyoming.wake import Detect, Detection, NotDetected
 
+from . import __version__
+
 _LOGGER = logging.getLogger()
 _DIR = Path(__file__).parent
 
@@ -94,9 +96,20 @@ async def main() -> None:
     parser.add_argument("--sensitivity", type=float, default=0.5)
     #
     parser.add_argument("--debug", action="store_true", help="Log DEBUG messages")
+    parser.add_argument(
+        "--log-format", default=logging.BASIC_FORMAT, help="Format for log messages"
+    )
+    parser.add_argument("--version", action="store_true", help="Print version and exit")
+
     args = parser.parse_args()
-    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
+    logging.basicConfig(
+        level=logging.DEBUG if args.debug else logging.INFO, format=args.log_format
+    )
     _LOGGER.debug(args)
+
+    if args.version:
+        print(__version__)
+        return
 
     if not args.system:
         machine = platform.machine().lower()
@@ -276,8 +289,13 @@ class Porcupine1EventHandler(AsyncEventHandler):
 
 # -----------------------------------------------------------------------------
 
+
+def run() -> None:
+    asyncio.run(main())
+
+
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        run()
     except KeyboardInterrupt:
         pass

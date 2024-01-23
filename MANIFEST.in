@@ -1,3 +1,4 @@
 include requirements.txt
 recursive-include wyoming_porcupine1/data/**/*.pv
 recursive-include wyoming_porcupine1/data/**/*.ppn
+include wyoming_porcupine1/VERSION

@@ -16,11 +16,16 @@ module_dir = this_dir / "wyoming_porcupine1"
 data_dir = module_dir / "data"
 data_files = list(data_dir.rglob("*.pv")) + list(data_dir.rglob("*.ppn"))
 
+version_path = module_dir / "VERSION"
+data_files.append(version_path)
+version = version_path.read_text(encoding="utf-8").strip()
+
+
 # -----------------------------------------------------------------------------
 
 setup(
     name="wyoming_porcupine1",
-    version="1.0.1",
+    version=version,
     description="Wyoming Server for Porcupine 1",
     url="http://github.com/rhasspy/wyoming-porcupine1",
     author="Michael Hansen",
@@ -43,4 +48,7 @@ setup(
         "Programming Language :: Python :: 3.11",
     ],
     keywords="rhasspy wyoming porcupine wake word",
+    entry_points={
+        "console_scripts": ["wyoming-porcupine1 = wyoming_porcupine1.__main__:run"]
+    },
 )
