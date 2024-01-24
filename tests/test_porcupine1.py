@@ -25,7 +25,6 @@ async def test_porcupine1() -> None:
         "stdio://",
         stdin=PIPE,
         stdout=PIPE,
-        stderr=PIPE,
     )
     assert proc.stdin is not None
     assert proc.stdout is not None
@@ -104,6 +103,6 @@ async def test_porcupine1() -> None:
 
     # Need to close stdin for graceful termination
     proc.stdin.close()
-    _, stderr = await proc.communicate()
+    await proc.communicate()
 
-    assert proc.returncode == 0, stderr.decode()
+    assert proc.returncode == 0
