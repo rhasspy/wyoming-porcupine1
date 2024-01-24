@@ -1,4 +1,4 @@
-"""Tests for wyoming-snowboy"""
+"""Tests for wyoming-porcupine1"""
 import asyncio
 import sys
 import wave

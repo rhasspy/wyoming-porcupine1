@@ -146,6 +146,7 @@ async def main() -> None:
                     name="Picovoice", url="https://github.com/Picovoice/porcupine"
                 ),
                 installed=True,
+                version=__version__,
                 models=[
                     WakeModel(
                         name=kw.name,
@@ -156,6 +157,7 @@ async def main() -> None:
                         ),
                         installed=True,
                         languages=[kw.language],
+                        version="1.9.0",
                     )
                     for kw in keywords.values()
                 ],
