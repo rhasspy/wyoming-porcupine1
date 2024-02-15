@@ -15,6 +15,6 @@ jobs:
           script/setup --dev
       - name: test
         run: |
-          test $(script/run --version) = $(cat wyoming_porcupine1/VERSION)
+          test $(script/run --version) = $(cat wyoming_porcupine3/VERSION)
           script/lint
           script/test

@@ -1,4 +1,4 @@
-"""Tests for wyoming-porcupine1"""
+"""Tests for wyoming-porcupine3"""
 import asyncio
 import sys
 import wave
@@ -16,11 +16,11 @@ _SAMPLES_PER_CHUNK = 1024
 
 
 @pytest.mark.asyncio
-async def test_porcupine1() -> None:
+async def test_porcupine3() -> None:
     proc = await asyncio.create_subprocess_exec(
         sys.executable,
         "-m",
-        "wyoming_porcupine1",
+        "wyoming_porcupine3",
         "--uri",
         "stdio://",
         stdin=PIPE,

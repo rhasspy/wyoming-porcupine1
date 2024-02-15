@@ -1,4 +1,4 @@
-"""Wyoming protocol server for porcupine1."""
+"""Wyoming protocol server for porcupine3."""
 from pathlib import Path
 
 _DIR = Path(__file__).parent

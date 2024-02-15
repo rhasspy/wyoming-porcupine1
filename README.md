@@ -1,18 +1,25 @@
-# Wyoming Porcupine1
+# Wyoming Porcupine3
 
-[Wyoming protocol](https://github.com/rhasspy/wyoming) server for the [porcupine1](https://github.com/Picovoice/porcupine) wake word detection system.
+[Wyoming protocol](https://github.com/rhasspy/wyoming) server for the [porcupine3](https://github.com/Picovoice/porcupine) wake word detection system.
 
+# Local Install
 
-## Home Assistant Add-on
+Clone the repository and set up Python virtual environment:
 
-[![Show add-on](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_addon/?addon=47701997_porcupine1&repository_url=https%3A%2F%2Fgithub.com%2Frhasspy%2Fhassio-addons)
+```bash
+git clone https://github.com/piitaya/wyoming-porcupine3.git
+cd wyoming-porcupine3
+script/setup
+```
 
-[Source](https://github.com/rhasspy/hassio-addons/tree/master/porcupine1)
+Run a server that anyone can connect to:
+
+```bash
+script/run --uri 'tcp://0.0.0.0:10400'
+```
 
 ## Docker Image
 
-``` sh
-docker run -it -p 10400:10400 rhasspy/wyoming-porcupine1
+```sh
+docker run -it -p 10400:10400 piitaya/wyoming-porcupine3
 ```
-
-[Source](https://github.com/rhasspy/wyoming-addons/tree/master/porcupine1)
