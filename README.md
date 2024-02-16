@@ -2,6 +2,8 @@
 
 [Wyoming protocol](https://github.com/rhasspy/wyoming) server for the [porcupine3](https://github.com/Picovoice/porcupine) wake word detection system.
 
+You need a Picovoice access key to run Porcupine 3.
+
 # Local Install
 
 Clone the repository and set up Python virtual environment:
@@ -15,11 +17,9 @@ script/setup
 Run a server that anyone can connect to:
 
 ```bash
-script/run --uri 'tcp://0.0.0.0:10400'
+script/run --uri 'tcp://0.0.0.0:10400' --access-key='PICOVOICE_ACCESS_KEY'
 ```
 
 ## Docker Image
 
-```sh
-docker run -it -p 10400:10400 piitaya/wyoming-porcupine3
-```
+Docker is not supported for now because of access key limitation (more info here: https://github.com/Picovoice/picovoice/issues/552).
