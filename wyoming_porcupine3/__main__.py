@@ -95,7 +95,7 @@ async def main() -> None:
     )
     parser.add_argument("--system", help="linux or raspberry-pi")
     parser.add_argument("--sensitivity", type=float, default=0.5)
-    parser.add_argument("--access-key", help="Access key for porcupine")
+    parser.add_argument("--access-key", help="Access key for porcupine", type=str, default="")
     parser.add_argument("--debug", action="store_true", help="Log DEBUG messages")
     parser.add_argument(
         "--log-format", default=logging.BASIC_FORMAT, help="Format for log messages"
@@ -114,7 +114,10 @@ async def main() -> None:
 
     if not args.system:
         machine = platform.machine().lower()
-        if ("arm" in machine) or ("aarch" in machine):
+        machine_platform = platform.platform().lower()
+        if ("macos" in machine_platform):
+            args.system = "mac"
+        elif ("arm" in machine) or ("aarch" in machine):
             args.system = "raspberry-pi"
         else:
             args.system = "linux"
