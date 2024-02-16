@@ -93,6 +93,10 @@ async def main() -> None:
     parser.add_argument(
         "--data-dir", default=_DIR / "data", help="Path to directory lib/resources"
     )
+    parser.add_argument(
+        "--custom-wake-words-dir",
+        help="Path to directory for custom wake words",
+    )
     parser.add_argument("--system", help="linux or raspberry-pi")
     parser.add_argument("--sensitivity", type=float, default=0.5)
     parser.add_argument("--access-key", help="Access key for porcupine", type=str, default="")
@@ -140,6 +144,15 @@ async def main() -> None:
         kw_lang = kw_path.parent.parent.name
         kw_name = kw_path.stem.rsplit("_", maxsplit=1)[0]
         keywords[kw_name] = Keyword(language=kw_lang, name=kw_name, model_path=kw_path)
+
+    if (args.custom_wake_words_dir is not None):
+        args.custom_wake_words_dir = Path(args.custom_wake_words_dir)
+        for custom_kw_path in (args.custom_wake_words_dir).rglob("*.ppn"):
+            kw_lang = custom_kw_path.stem.rsplit("_")[1]
+            kw_name = custom_kw_path.stem.rsplit("_")[0]
+            keywords[kw_name] = Keyword(language=kw_lang, name=kw_name, model_path=custom_kw_path)
+            _LOGGER.info(kw_lang)
+            _LOGGER.info(kw_name)
 
     wyoming_info = Info(
         wake=[

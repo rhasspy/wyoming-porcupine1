@@ -14,3 +14,5 @@ htmlcov
 __pycache__/
 
 /dist/
+
+custom_wake_words/
