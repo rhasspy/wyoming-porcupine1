@@ -141,7 +141,7 @@ async def main() -> None:
         wake=[
             WakeProgram(
                 name="porcupine1",
-                description="On-device wake word detection powered by deep learning ",
+                description="On-device wake word detection powered by deep learning",
                 attribution=Attribution(
                     name="Picovoice", url="https://github.com/Picovoice/porcupine"
                 ),
@@ -151,6 +151,7 @@ async def main() -> None:
                     WakeModel(
                         name=kw.name,
                         description=f"{kw.name} ({kw.language})",
+                        phrase=kw.name,
                         attribution=Attribution(
                             name="Picovoice",
                             url="https://github.com/Picovoice/porcupine",

@@ -12,5 +12,6 @@ htmlcov
 /.venv/
 .mypy_cache/
 __pycache__/
+.tox/
 
 /dist/

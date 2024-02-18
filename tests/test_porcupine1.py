@@ -42,9 +42,9 @@ async def test_porcupine1() -> None:
         assert len(info.wake) == 1, "Expected one wake service"
         wake = info.wake[0]
         assert len(wake.models) > 0, "Expected at least one model"
-        assert any(
-            m.name == "porcupine" for m in wake.models
-        ), "Expected porcupine model"
+        porcupine_model = next((m for m in wake.models if m.name == "porcupine"), None)
+        assert porcupine_model is not None, "Expected porcupine model"
+        assert porcupine_model.phrase == "porcupine"
         break
 
     # We want to use the porcupine model
