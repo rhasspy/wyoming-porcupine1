@@ -25,8 +25,8 @@ jobs:
           python-version: "${{ matrix.python_version }}"
           cache: "pip"
           cache-dependency-path: requirements_dev.txt
+      - run: script/setup --dev
       - run: |
           test $(script/run --version) = $(cat wyoming_porcupine1/VERSION)
-      - run: script/setup --dev
       - run: script/lint
       - run: script/test
